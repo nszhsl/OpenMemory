@@ -8,7 +8,7 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++ curl bash
 
 # Install Bun globally and relocate it to a shared, persistent location
-RUN curl --proxy http://192.168.0.3:17890 -fsSL https://bun.sh/install | bash \
+RUN curl -fsSL https://bun.net.cn/install | bash \
  && mv /root/.bun /opt/bun \
  && ln -s /opt/bun/bin/bun /usr/local/bin/bun
 
