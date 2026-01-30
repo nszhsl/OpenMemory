@@ -10,7 +10,7 @@ ARG NODE_DISTURL="https://npmmirror.com/mirrors/node"
 
 # 1) Switch Alpine repositories to a CN mirror (reduces apk timeout)
 RUN sed -i "s#https\?://dl-cdn.alpinelinux.org/alpine#${ALPINE_MIRROR}#g" /etc/apk/repositories \
- && apk add --no-cache python3 make g++ curl bash
+ && apk add --no-cache python3 py3-setuptools make g++ curl bash
 
 # 2) Use CN-friendly registries for npm & bun (bun install reads npm-style env)
 ENV npm_config_registry="${NPM_REGISTRY}" \
@@ -34,11 +34,11 @@ ENV npm_config_registry="${NPM_REGISTRY}" \
 #     CYPRESS_DOWNLOAD_MIRROR="https://npmmirror.com/mirrors/cypress/" \
 #     PUPPETEER_SKIP_DOWNLOAD="true"
 
-# 3) Install Bun (you already use bun.net.cn which is CN-friendly)
-RUN curl -fsSL https://bun.net.cn/install | bash \
- && mv /root/.bun /opt/bun \
- && ln -s /opt/bun/bin/bun /usr/local/bin/bun
-ENV PATH="/opt/bun/bin:${PATH}"
+# 3) Skip Bun, use npm instead (GitHub access issues)
+# RUN curl -fsSL https://bun.net.cn/install | bash \
+#  && mv /root/.bun /opt/bun \
+#  && ln -s /opt/bun/bin/bun /usr/local/bin/bun
+# ENV PATH="/opt/bun/bin:${PATH}"
 
 # 4) Copy manifests + lockfile(s) (important for reproducible builds)
 COPY package*.json ./
@@ -46,13 +46,13 @@ COPY package*.json ./
 COPY bun.lockb* ./
 COPY package-lock.json* ./
 
-# 5) Install deps (bun will use npm_config_registry)
-RUN bun install --frozen-lockfile
+# 5) Install deps with npm instead of bun
+RUN npm install
 
 # 6) Build
 COPY src/ ./src/
 COPY tsconfig.json ./
-RUN bun run build
+RUN npm run build
 
 # 7) Prune dev deps to reduce final size
 RUN npm prune --omit=dev
