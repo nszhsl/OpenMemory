@@ -127,7 +127,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   # Optional: Valkey for high-performance vector storage
   # Uncomment to use Valkey instead of SQLite/PostgreSQL for vectors
   # Don't forget to set OM_VECTOR_BACKEND=valkey in your .env
